@@ -1,0 +1,34 @@
+commit 8ea4366d7bf85e52233f6382b20bb3bcf5c10c06
+Author: Shramee Srivastav <shramee.srivastav@gmail.com>
+Date:   Sun Jul 5 08:39:29 2026 +0530
+
+    chore: g16 sim benchmark circuits
+
+diff --git a/frontend/cs/scs/api.go b/frontend/cs/scs/api.go
+index bc92a65..702b939 100644
+--- a/frontend/cs/scs/api.go
++++ b/frontend/cs/scs/api.go
+@@ -23,6 +23,8 @@ import (
+ 	"github.com/consensys/gnark/std/math/bits"
+ )
+ 
++var NbCommitments int
++
+ func (builder *builder[E]) Add(i1, i2 frontend.Variable, in ...frontend.Variable) frontend.Variable {
+ 	// separate the constant part from the variables
+ 	vars, k := builder.filterConstantSum(append([]frontend.Variable{i1, i2}, in...))
+@@ -703,6 +705,14 @@ func (builder *builder[E]) AddPlonkCommitmentOutputs(committed []int, outs []fro
+ }
+ 
+ func (builder *builder[E]) Commit(v ...frontend.Variable) (frontend.Variable, error) {
++	nbCommits := builder.GetKeyValue("API Commitments")
++	if nbCommits != nil {
++		NbCommitments = nbCommits.(int) + len(v)
++		// println("API Commitments", builder.GetKeyValue("API Commitments"))
++	} else {
++		NbCommitments = len(v)
++	}
++	builder.SetKeyValue("API Commitments", NbCommitments)
+ 	if smallfields.IsSmallField(builder.Field()) {
+ 		return nil, fmt.Errorf("commitment not supported for small field %s", builder.Field())
+ 	}
