@@ -15,8 +15,8 @@ git ls-files --recurse-submodules -z | tar --null -T - -cf - | (mkdir "$STAGE/$N
 
 cd "$STAGE/$NAME"
 find . \( -name .git -o -name .github -o -name .gitmodules -o -name .gitignore -o -name .gitattributes -o -name .gitlint \) -prune -exec rm -rf {} +
-# polyring's project website (docs/) is not part of the artifact.
-rm -rf polyring/docs
+# Of polyring's website source (docs/), keep only the PDF booklet.
+find polyring/docs -mindepth 1 ! -name polyring-toolkit.pdf -delete
 
 mkdir -p "$ROOT/dist"
 rm -f "$ROOT/dist/$NAME.zip"

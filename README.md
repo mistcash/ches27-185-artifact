@@ -10,7 +10,7 @@ The paper's main measured result is Table 7: a 32–36% constraint reduction for
 | Path | What | Read |
 |---|---|---|
 | `ppprt/` | The gnark fork the paper was measured on. Frozen, to reproduce Table 7 as published. Not sound: it predates two gnark security fixes. | [ppprt/README.md](ppprt/README.md) |
-| `polyring/` | The maintained implementation on patched gnark: full Groth16 recursion and an Ethereum verifier ([below](#beyond-the-paper-polyring)). Re-measures Table 7, maps paper sections to code. | [polyring/paper/ARTIFACT.md](polyring/paper/ARTIFACT.md), then [polyring/README.md](polyring/README.md) |
+| `polyring/` | The maintained implementation on patched gnark: full Groth16 recursion and an Ethereum verifier ([below](#beyond-the-paper-polyring)). Re-measures Table 7, maps paper sections to code. | [polyring/paper/ARTIFACT.md](polyring/paper/ARTIFACT.md), [polyring/README.md](polyring/README.md), booklet [polyring-toolkit.pdf](polyring/docs/polyring-toolkit.pdf) |
 | `scripts/run.sh` | Runs all experiments, saves output to `results/` | |
 | `scripts/make-zip.sh` | Builds `dist/ches27-185-artifact.zip` without git/GitHub files | |
 | `patches/` | ppprt's commitment counter, applied to upstream gnark for the baseline | |
@@ -33,7 +33,7 @@ go test ./examples/recursion/ -run TestGroth16Verifier -v   # inner proof → ou
 go test ./examples/recursion/ -run TestOuterOnChain -v      # deploy + verify on EVM, prints gas; needs solc 0.8.24+, ~2 min
 ```
 
-Usage, layout and per-phase benchmarks: [polyring/README.md](polyring/README.md).
+To get started: the onboarding booklet [polyring/docs/polyring-toolkit.pdf](polyring/docs/polyring-toolkit.pdf) (overview, guide and paper summary; also online at [polyring.mist.cash](https://polyring.mist.cash)). Usage, layout and per-phase benchmarks: [polyring/README.md](polyring/README.md).
 
 ## Requirements
 
