@@ -1,0 +1,6 @@
+[submodule "polyring"]
+	path = polyring
+	url = https://github.com/mistcash/polyring
+[submodule "ppprt"]
+	path = ppprt
+	url = https://github.com/mistcash/ppprt
