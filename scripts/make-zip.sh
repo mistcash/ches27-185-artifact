@@ -17,8 +17,6 @@ cd "$STAGE/$NAME"
 find . \( -name .git -o -name .github -o -name .gitmodules -o -name .gitignore -o -name .gitattributes -o -name .gitlint \) -prune -exec rm -rf {} +
 # polyring's project website (docs/) is not part of the artifact.
 rm -rf polyring/docs
-# HotCRP form text, not part of the artifact.
-rm -f SUBMISSION.md
 
 mkdir -p "$ROOT/dist"
 rm -f "$ROOT/dist/$NAME.zip"

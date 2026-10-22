@@ -3,7 +3,7 @@
 #   smoke     polyring test suite, no on-chain test               (~25 s)
 #   table7    Table 7 re-measured on patched gnark, polyring      (~45 s)
 #   ppprt     Table 7 "This Work" column as published, ppprt      (~1 min)
-#   baseline  Table 7 baseline column, upstream gnark   (~2 min, clones gnark)
+#   baseline  Table 7 baseline column, upstream gnark       (~2 min, clones gnark)
 #   all       everything above (default)
 # Output is printed and also saved under results/.
 set -euo pipefail
