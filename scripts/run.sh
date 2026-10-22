@@ -3,13 +3,14 @@
 #   smoke     polyring test suite, no on-chain test               (~25 s)
 #   table7    Table 7 re-measured on patched gnark, polyring      (~45 s)
 #   ppprt     Table 7 "This Work" column as published, ppprt      (~1 min)
-#   baseline  Table 7 baseline column, upstream gnark @ GNARK_REV (~2 min, clones gnark)
+#   baseline  Table 7 baseline column, upstream gnark   (~2 min, clones gnark)
 #   all       everything above (default)
 # Output is printed and also saved under results/.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-source "$ROOT/components.env"
+# Upstream gnark commit ppprt is merged on.
+GNARK_REV=c05c6a8109be76360431f478ba5bc8e5969e05cf
 RESULTS="$ROOT/results"
 mkdir -p "$RESULTS"
 
@@ -27,7 +28,7 @@ ppprt() { (cd "$ROOT/ppprt" && "${BENCH[@]}") 2>&1 | tee "$RESULTS/table7-ppprt.
 baseline() {
   local dir="$ROOT/gnark-baseline"
   if [ ! -d "$dir/.git" ]; then
-    git clone "$GNARK_URL" "$dir"
+    git clone https://github.com/Consensys/gnark "$dir"
     git -C "$dir" checkout -q "$GNARK_REV"
     git -C "$dir" apply "$ROOT/patches/gnark-nb-commitments.patch"
     for c in sw_bn254 sw_bls12381; do
