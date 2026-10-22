@@ -33,7 +33,7 @@ go test ./examples/recursion/ -run TestGroth16Verifier -v   # inner proof → ou
 go test ./examples/recursion/ -run TestOuterOnChain -v      # deploy + verify on EVM, prints gas; needs solc 0.8.24+, ~2 min
 ```
 
-To get started: the onboarding booklet [polyring/docs/polyring-toolkit.pdf](polyring/docs/polyring-toolkit.pdf) (overview, guide and paper summary; also online at [polyring.mist.cash](https://polyring.mist.cash)). Usage, layout and per-phase benchmarks: [polyring/README.md](polyring/README.md).
+To get started: the onboarding booklet [polyring/docs/polyring-toolkit.pdf](polyring/docs/polyring-toolkit.pdf) (overview, guide and paper chapters; also online at [polyring.mist.cash](https://polyring.mist.cash)). Usage, layout and per-phase benchmarks: [polyring/README.md](polyring/README.md).
 
 ## Requirements
 
