@@ -13,7 +13,6 @@ The paper's main measured result is Table 7: a 32–36% constraint reduction for
 | `polyring/` | The maintained implementation on patched gnark: full Groth16 recursion and an Ethereum verifier ([below](#beyond-the-paper-polyring)). Re-measures Table 7, maps paper sections to code. | [polyring/paper/ARTIFACT.md](polyring/paper/ARTIFACT.md), [polyring/README.md](polyring/README.md), booklet [polyring-toolkit.pdf](polyring/docs/polyring-toolkit.pdf) |
 | `scripts/run.sh` | Runs all experiments, saves output to `results/` | |
 | `scripts/make-zip.sh` | Builds `dist/ches27-185-artifact.zip` without git/GitHub files | |
-| `patches/` | ppprt's commitment counter, applied to upstream gnark for the baseline | |
 
 Both repositories are git submodules at pinned commits (`git submodule update --init`). The zip already includes them.
 
@@ -37,7 +36,7 @@ To get started: the onboarding booklet [polyring/docs/polyring-toolkit.pdf](poly
 
 ## Requirements
 
-Go 1.26.8, git, bash; `solc` 0.8.24+ only for the on-chain test. Network access on the first run, for Go modules and the baseline's gnark clone. Any 64-bit machine with ≥ 8 GB RAM; the reference machine is an Apple M3 Pro.
+Go 1.26.8, git, bash; `solc` 0.8.24+ only for the on-chain test. Network access on the first run, for Go modules and gnark's pairing files (baseline). Any 64-bit machine with ≥ 8 GB RAM; the reference machine is an Apple M3 Pro.
 
 Getting Go 1.26.8: with any Go ≥ 1.21 installed, `export GOTOOLCHAIN=go1.26.8` makes `go` download and use it. Otherwise (no Go, or an older distro package such as Ubuntu 22.04's 1.18), install the official build:
 
@@ -52,7 +51,7 @@ export PATH=/usr/local/go/bin:$PATH   # go version → go1.26.8
 ```sh
 scripts/run.sh            # everything, ~5 min
 scripts/run.sh ppprt      # Table 7 "This Work", as published     ~1 min
-scripts/run.sh baseline   # Table 7 baseline, upstream gnark        ~2 min
+scripts/run.sh baseline   # Table 7 baseline, gnark's pairing       ~1 min
 scripts/run.sh table7     # Table 7 on patched gnark (polyring)     ~45 s
 scripts/run.sh smoke      # polyring test suite                     ~25 s
 ```
@@ -61,8 +60,8 @@ scripts/run.sh smoke      # polyring test suite                     ~25 s
 
 | Command | Paper | Expected |
 |---|---|---|
-| `ppprt` | Table 7, "This Work" | `nb constraints` 1,035,645 SCS / 316,181 R1CS (BN254), 1,191,256 / 368,461 (BLS12-381): within 0.02% of the paper |
-| `baseline` | Table 7, baseline | 1,604,279 / 495,810 (BN254), 1,779,202 / 542,925 (BLS12-381): within 1% of the paper |
+| `ppprt` | Table 7, "This Work" | At ppprt `2f9ffd0`: `nb constraints` 1,035,338 SCS / 315,955 R1CS (BN254), 1,190,949 / 368,278 (BLS12-381): within 0.06% of the paper; `nb commitments` identical |
+| `baseline` | Table 7, baseline | Same tree with gnark's pairing: `nb constraints` 1,592,216 / 491,223 (BN254), 1,784,091 / 545,354 (BLS12-381): within 0.05% of the paper; `nb commitments` identical |
 | `table7` | Table 7 on patched gnark | Full table printed, gnark vs polyring; fails if any count drifts |
 | `smoke` | correctness | every package `ok` |
 

@@ -2,15 +2,16 @@
 # Runs the artifact experiments. Usage: scripts/run.sh [smoke|table7|ppprt|baseline|all]
 #   smoke     polyring test suite, no on-chain test               (~25 s)
 #   table7    Table 7 re-measured on patched gnark, polyring      (~45 s)
-#   ppprt     Table 7 "This Work" column as published, ppprt      (~1 min)
-#   baseline  Table 7 baseline column, upstream gnark       (~2 min, clones gnark)
+#   ppprt     Table 7 "This Work" column, ppprt at 2f9ffd0        (~1 min)
+#   baseline  Table 7 baseline column, same tree, gnark's pairing (~1 min)
 #   all       everything above (default)
 # Output is printed and also saved under results/.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-# Upstream gnark commit ppprt is merged on.
-GNARK_REV=c05c6a8109be76360431f478ba5bc8e5969e05cf
+# ppprt commit Table 7 is measured at, and the upstream gnark its baseline pairing comes from.
+PPPRT_REV=2f9ffd0
+GNARK_REV=8e4363f1a60dc2febaa872fbda8847d78ce8cf48
 RESULTS="$ROOT/results"
 mkdir -p "$RESULTS"
 
@@ -21,20 +22,18 @@ smoke() { (cd "$ROOT/polyring" && go test -short ./...) 2>&1 | tee "$RESULTS/smo
 
 table7() { (cd "$ROOT/polyring" && go test ./paper/ -run TestTable7 -v) 2>&1 | tee "$RESULTS/table7-polyring.txt"; }
 
-ppprt() { (cd "$ROOT/ppprt" && "${BENCH[@]}") 2>&1 | tee "$RESULTS/table7-ppprt.txt"; }
+# Detached worktree of the ppprt submodule at PPPRT_REV (needs its git history), reused if present.
+ppprt_tree() { [ -d "$1" ] || git -C "$ROOT/ppprt" worktree add -q --detach "$1" "$PPPRT_REV"; }
 
-# Same benchmark file on upstream gnark, plus ppprt's one-line commitment counter
-# (ppprt commit 8ea4366, kept in patches/). See ppprt/README.md, "Baseline column".
+ppprt() { ppprt_tree "$ROOT/build/ppprt"; (cd "$ROOT/build/ppprt" && "${BENCH[@]}") 2>&1 | tee "$RESULTS/table7-ppprt.txt"; }
+
 baseline() {
-  local dir="$ROOT/gnark-baseline"
-  if [ ! -d "$dir/.git" ]; then
-    git clone https://github.com/Consensys/gnark "$dir"
-    git -C "$dir" checkout -q "$GNARK_REV"
-    git -C "$dir" apply "$ROOT/patches/gnark-nb-commitments.patch"
-    for c in sw_bn254 sw_bls12381; do
-      cp "$ROOT/ppprt/std/algebra/emulated/$c/g16_simulation_test.go" "$dir/std/algebra/emulated/$c/"
-    done
-  fi
+  local dir="$ROOT/build/baseline" e=std/algebra/emulated
+  ppprt_tree "$dir"
+  # gnark's pairing files from upstream GNARK_REV, and e12.go from ppprt 8ea4366.
+  git -C "$dir" fetch -q --depth 1 https://github.com/Consensys/gnark "$GNARK_REV"
+  git -C "$dir" checkout -q "$GNARK_REV" -- $e/sw_bn254/pairing.go $e/sw_bn254/hints.go $e/sw_bls12381/pairing.go
+  git -C "$dir" checkout -q 8ea4366 -- $e/fields_bn254/e12.go $e/fields_bls12381/e12.go
   (cd "$dir" && "${BENCH[@]}") 2>&1 | tee "$RESULTS/table7-baseline.txt"
 }
 
