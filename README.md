@@ -39,6 +39,14 @@ To get started: the onboarding booklet [polyring/docs/polyring-toolkit.pdf](poly
 
 Go 1.26.8, git, bash; `solc` 0.8.24+ only for the on-chain test. Network access on the first run, for Go modules and the baseline's gnark clone. Any 64-bit machine with ≥ 8 GB RAM; the reference machine is an Apple M3 Pro.
 
+Getting Go 1.26.8: with any Go ≥ 1.21 installed, `export GOTOOLCHAIN=go1.26.8` makes `go` download and use it. Otherwise (no Go, or an older distro package such as Ubuntu 22.04's 1.18), install the official build:
+
+```sh
+curl -fsSLO https://go.dev/dl/go1.26.8.linux-amd64.tar.gz   # other platforms: https://go.dev/dl/
+sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.26.8.linux-amd64.tar.gz
+export PATH=/usr/local/go/bin:$PATH   # go version → go1.26.8
+```
+
 ## Run
 
 ```sh
