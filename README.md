@@ -12,7 +12,7 @@ The paper's main measured result is Table 7: a 32–36% constraint reduction for
 | `ppprt/` | The gnark fork the paper was measured on. Frozen, to reproduce Table 7 as published. Not sound: it predates two gnark security fixes. | [ppprt/README.md](ppprt/README.md) |
 | `polyring/` | The maintained implementation on patched gnark: full Groth16 recursion and an Ethereum verifier ([below](#beyond-the-paper-polyring)). Re-measures Table 7, maps paper sections to code. | [polyring/paper/ARTIFACT.md](polyring/paper/ARTIFACT.md), [polyring/README.md](polyring/README.md), booklet [polyring-toolkit.pdf](polyring/docs/polyring-toolkit.pdf) |
 | `scripts/run.sh` | Runs all experiments, saves output to `results/` | |
-| `scripts/make-zip.sh` | Builds `dist/ches27-185-artifact.zip` without git/GitHub files | |
+| `scripts/make-zip.sh` | Builds `dist/ches27-185-artifact.zip` with full git history | |
 
 Both repositories are git submodules at pinned commits (`git submodule update --init`). The zip already includes them.
 
