@@ -17,7 +17,7 @@ The paper's main measured result is Table 7: a 32–36% constraint reduction for
 
 Both repositories are git submodules at pinned commits (`git submodule update --init`). The zip already includes them.
 
-Table 6 (Cairo) was measured in [Garaga](https://github.com/keep-starknet-strange/garaga) and is not part of this artifact.
+Table 6 (Cairo) was measured in [Garaga PR #129](https://github.com/keep-starknet-strange/garaga/pull/129) (before: [`def46a3`](https://github.com/keep-starknet-strange/garaga/blob/def46a3fa599f694d0c92d103940b6ace8c2c322/README.md), after: [`a43b7d0`](https://github.com/keep-starknet-strange/garaga/blob/a43b7d06aff59e1f0cc07a4f6a06341b50dd903f/README.md), `MultiPairing n=3` rows) and is not part of this artifact.
 
 ## Beyond the paper: polyring
 
