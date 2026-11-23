@@ -49,11 +49,13 @@ export PATH=/usr/local/go/bin:$PATH   # go version → go1.26.8
 ## Run
 
 ```sh
-scripts/run.sh            # everything, ~5 min
-scripts/run.sh ppprt      # Table 7 "This Work", as published     ~1 min
-scripts/run.sh baseline   # Table 7 baseline, gnark's pairing       ~1 min
+scripts/run.sh            # everything, ~7 min
+scripts/run.sh ppprt      # Table 7 "This Work", as published     ~2 min
+scripts/run.sh baseline   # Table 7 baseline, gnark's pairing       ~2 min
 scripts/run.sh table7     # Table 7 on patched gnark (polyring)     ~45 s
 scripts/run.sh smoke      # polyring test suite                     ~25 s
+scripts/run.sh summary    # baseline vs ppprt: medians ± spread     ~1 s
+COUNT=1 scripts/run.sh    # quick: each benchmark once instead of 6 times
 ```
 
 ## Expected output
@@ -67,7 +69,7 @@ scripts/run.sh smoke      # polyring test suite                     ~25 s
 
 How to read each output line: [ppprt/README.md](ppprt/README.md#reading-the-output). Why the patched numbers differ from the paper: [polyring/paper/ARTIFACT.md](polyring/paper/ARTIFACT.md#why-the-numbers-move).
 
-Constraint counts are exact. Times and memory move ~20% between runs and machines, so compare reductions rather than absolute values.
+Constraint counts are exact. Times and memory vary between runs and machines (`ppprt` and `baseline` repeat each benchmark `COUNT=6` times; `results/table7-summary.txt` gives the spread), so compare reductions rather than absolute values.
 
 ## Licence
 

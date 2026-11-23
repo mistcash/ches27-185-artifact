@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-# Runs the artifact experiments. Usage: scripts/run.sh [smoke|table7|ppprt|baseline|all]
+# Runs the artifact experiments. Usage: scripts/run.sh [smoke|table7|ppprt|baseline|summary|all]
 #   smoke     polyring test suite, no on-chain test               (~25 s)
 #   table7    Table 7 re-measured on patched gnark, polyring      (~45 s)
-#   ppprt     Table 7 "This Work" column, ppprt at 2f9ffd0        (~1 min)
-#   baseline  Table 7 baseline column, same tree, gnark's pairing (~1 min)
+#   ppprt     Table 7 "This Work" column, ppprt at 2f9ffd0        (~2 min)
+#   baseline  Table 7 baseline column, same tree, gnark's pairing (~2 min)
+#   summary   benchstat of baseline vs ppprt: medians, spread, p-values
 #   all       everything above (default)
+# ppprt and baseline run each benchmark COUNT times (default 6, the fewest benchstat gives a spread for).
 # Output is printed and also saved under results/.
 set -euo pipefail
 
@@ -15,7 +17,7 @@ GNARK_REV=8e4363f1a60dc2febaa872fbda8847d78ce8cf48
 RESULTS="$ROOT/results"
 mkdir -p "$RESULTS"
 
-BENCH=(go test -v -run '^$' -bench 'Groth16Simulation' -benchmem
+BENCH=(go test -v -run '^$' -bench 'Groth16Simulation' -benchmem -count="${COUNT:-6}"
   ./std/algebra/emulated/sw_bn254/ ./std/algebra/emulated/sw_bls12381/)
 
 smoke() { (cd "$ROOT/polyring" && go test -short ./...) 2>&1 | tee "$RESULTS/smoke.txt"; }
@@ -37,8 +39,13 @@ baseline() {
   (cd "$dir" && "${BENCH[@]}") 2>&1 | tee "$RESULTS/table7-baseline.txt"
 }
 
+summary() {
+  go run golang.org/x/perf/cmd/benchstat@v0.0.0-20261117185222-4febdb082b2c \
+    baseline="$RESULTS/table7-baseline.txt" ppprt="$RESULTS/table7-ppprt.txt" | tee "$RESULTS/table7-summary.txt"
+}
+
 case "${1:-all}" in
-  smoke | table7 | ppprt | baseline) "$1" ;;
-  all) smoke; table7; ppprt; baseline ;;
-  *) sed -n '2,8p' "$0"; exit 1 ;;
+  smoke | table7 | ppprt | baseline | summary) "$1" ;;
+  all) smoke; table7; ppprt; baseline; summary ;;
+  *) sed -n '2,10p' "$0"; exit 1 ;;
 esac
