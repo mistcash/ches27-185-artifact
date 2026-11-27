@@ -16,7 +16,7 @@ The paper's main measured result is Table 7: a 32–36% constraint reduction for
 
 Both repositories are git submodules at pinned commits (`git submodule update --init`). The zip already includes them.
 
-Table 6 (Cairo) was measured in [Garaga PR #129](https://github.com/keep-starknet-strange/garaga/pull/129) (before: [`def46a3`](https://github.com/keep-starknet-strange/garaga/blob/def46a3), after: [`a43b7d0`](https://github.com/keep-starknet-strange/garaga/blob/a43b7d0), `MultiPairing n=3` rows) and is not part of this artifact. Both commits regenerate those rows exactly.
+Table 6 (Cairo) was measured in [Garaga PR #129](https://github.com/keep-starknet-strange/garaga/pull/129) (before: [`def46a3`](https://github.com/keep-starknet-strange/garaga/blob/def46a3), after: [`a43b7d0`](https://github.com/keep-starknet-strange/garaga/blob/a43b7d0), `MultiPairing n=3` rows) and is not part of this artifact. Both commits regenerate those rows exactly. Garaga's `POSEIDON` column is the paper's COMMITS, and `~steps` is VM STEPS.
 
 ```sh
 # instruction to reproduce Garaga benchmarks
@@ -74,10 +74,12 @@ COUNT=1 scripts/run.sh    # quick: each benchmark once instead of 6 times
 
 | Command | Paper | Expected |
 |---|---|---|
-| `ppprt` | Table 7, "This Work" | At ppprt `2f9ffd0`: `nb constraints` 1,035,338 SCS / 315,955 R1CS (BN254), 1,190,949 / 368,278 (BLS12-381): within 0.06% of the paper; `nb commitments` identical |
+| `ppprt` | Table 7, "This Work" | At ppprt `2f9ffd0`: `nb constraints` 1,035,338 SCS / 315,955 R1CS (BN254), 1,190,949 / 368,278 (BLS12-381): within 0.07% of the paper; `nb commitments` identical |
 | `baseline` | Table 7, baseline | Same tree with gnark's pairing: `nb constraints` 1,592,216 / 491,223 (BN254), 1,784,091 / 545,354 (BLS12-381): within 0.05% of the paper; `nb commitments` identical |
 | `table7` | Table 7 on patched gnark | Full table printed, gnark vs polyring; fails if any count drifts |
 | `smoke` | correctness | every package `ok` |
+
+The exact working tree the paper's columns were measured on was not committed. At `2f9ffd0` both columns sit the same 212–224 (BN254) and 156 (BLS12-381) constraints below the paper, so the gap is in the surrounding benchmark circuit, not the pairing check, and the reductions match the paper to within 0.1 percentage points.
 
 How to read each output line: [ppprt/README.md](ppprt/README.md#reading-the-output). Why the patched numbers differ from the paper: [polyring/paper/ARTIFACT.md](polyring/paper/ARTIFACT.md#why-the-numbers-move).
 
