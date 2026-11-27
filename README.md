@@ -16,7 +16,19 @@ The paper's main measured result is Table 7: a 32–36% constraint reduction for
 
 Both repositories are git submodules at pinned commits (`git submodule update --init`). The zip already includes them.
 
-Table 6 (Cairo) was measured in [Garaga PR #129](https://github.com/keep-starknet-strange/garaga/pull/129) (before: [`def46a3`](https://github.com/keep-starknet-strange/garaga/blob/def46a3fa599f694d0c92d103940b6ace8c2c322/README.md), after: [`a43b7d0`](https://github.com/keep-starknet-strange/garaga/blob/a43b7d06aff59e1f0cc07a4f6a06341b50dd903f/README.md), `MultiPairing n=3` rows) and is not part of this artifact.
+Table 6 (Cairo) was measured in [Garaga PR #129](https://github.com/keep-starknet-strange/garaga/pull/129) (before: [`def46a3`](https://github.com/keep-starknet-strange/garaga/blob/def46a3), after: [`a43b7d0`](https://github.com/keep-starknet-strange/garaga/blob/a43b7d0), `MultiPairing n=3` rows) and is not part of this artifact. Both commits regenerate those rows exactly.
+
+```sh
+# instruction to reproduce Garaga benchmarks
+git clone https://github.com/keep-starknet-strange/garaga && cd garaga
+git fetch origin pull/129/head && git checkout a43b7d0   # or def46a3 (before)
+python3.10 -m venv venv && . venv/bin/activate
+pip install -r tools/make/requirements.txt sympy==1.12.1 && make go
+sed -i.bak 's#lambdaworks.git" }#lambdaworks.git", rev = "dfe4f0eaf9b0d62d85e881c87622c37f1e1b2ea2" }#' tools/hades_binding/Cargo.toml
+(cd tools/hades_binding && CARGO_PROFILE_RELEASE_STRIP=false maturin develop --release)
+# def46a3 only, its MSM rows need Sage: sed -i.bak 's/for n in \[1, 2, 3, 10, 50\]:/for n in []:/' tests/benchmarks.py
+PYTHONPATH=. python tests/benchmarks.py | grep "MultiPairing n=3"
+```
 
 ## Beyond the paper: polyring
 
