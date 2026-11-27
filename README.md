@@ -12,12 +12,23 @@ The paper's main measured result is Table 7: a 32–36% constraint reduction for
 | `ppprt/` | The gnark fork the paper was measured on. Frozen, to reproduce Table 7 as published. Not sound: it predates two gnark security fixes. | [ppprt/README.md](ppprt/README.md) |
 | `polyring/` | The maintained implementation on patched gnark: full Groth16 recursion and an Ethereum verifier ([below](#beyond-the-paper-polyring)). Re-measures Table 7, maps paper sections to code. | [polyring/paper/ARTIFACT.md](polyring/paper/ARTIFACT.md), [polyring/README.md](polyring/README.md), booklet [polyring-toolkit.pdf](polyring/docs/polyring-toolkit.pdf) |
 | `scripts/run.sh` | Runs all experiments, saves output to `results/` | |
-| `scripts/make-zip.sh` | Builds `dist/ches27-185-artifact.zip` without git/GitHub files | |
-| `patches/` | ppprt's commitment counter, applied to upstream gnark for the baseline | |
+| `scripts/make-zip.sh` | Builds `dist/ches27-185-artifact.zip` with full git history | |
 
 Both repositories are git submodules at pinned commits (`git submodule update --init`). The zip already includes them.
 
-Table 6 (Cairo) was measured in [Garaga](https://github.com/keep-starknet-strange/garaga) and is not part of this artifact.
+Table 6 (Cairo) was measured in [Garaga PR #129](https://github.com/keep-starknet-strange/garaga/pull/129) (before: [`def46a3`](https://github.com/keep-starknet-strange/garaga/blob/def46a3), after: [`a43b7d0`](https://github.com/keep-starknet-strange/garaga/blob/a43b7d0), `MultiPairing n=3` rows) and is not part of this artifact. Both commits regenerate those rows exactly. Garaga's `POSEIDON` column is the paper's COMMITS, and `~steps` is VM STEPS.
+
+```sh
+# instruction to reproduce Garaga benchmarks
+git clone https://github.com/keep-starknet-strange/garaga && cd garaga
+git fetch origin pull/129/head && git checkout a43b7d0   # or def46a3 (before)
+python3.10 -m venv venv && . venv/bin/activate
+pip install -r tools/make/requirements.txt sympy==1.12.1 && make go
+sed -i.bak 's#lambdaworks.git" }#lambdaworks.git", rev = "dfe4f0eaf9b0d62d85e881c87622c37f1e1b2ea2" }#' tools/hades_binding/Cargo.toml
+(cd tools/hades_binding && CARGO_PROFILE_RELEASE_STRIP=false maturin develop --release)
+# def46a3 only, its MSM rows need Sage: sed -i.bak 's/for n in \[1, 2, 3, 10, 50\]:/for n in []:/' tests/benchmarks.py
+PYTHONPATH=. python tests/benchmarks.py | grep "MultiPairing n=3"
+```
 
 ## Beyond the paper: polyring
 
@@ -37,30 +48,42 @@ To get started: the onboarding booklet [polyring/docs/polyring-toolkit.pdf](poly
 
 ## Requirements
 
-Go 1.26.8, git, bash; `solc` 0.8.24+ only for the on-chain test. Network access on the first run, for Go modules and the baseline's gnark clone. Any 64-bit machine with ≥ 8 GB RAM; the reference machine is an Apple M3 Pro.
+Go 1.26.8, git, bash; `solc` 0.8.24+ only for the on-chain test. Network access on the first run, for Go modules and gnark's pairing files (baseline). Any 64-bit machine with ≥ 8 GB RAM; the reference machine is an Apple M3 Pro.
+
+Getting Go 1.26.8: with any Go ≥ 1.21 installed, `export GOTOOLCHAIN=go1.26.8` makes `go` download and use it. Otherwise (no Go, or an older distro package such as Ubuntu 22.04's 1.18), install the official build:
+
+```sh
+curl -fsSLO https://go.dev/dl/go1.26.8.linux-amd64.tar.gz   # other platforms: https://go.dev/dl/
+sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.26.8.linux-amd64.tar.gz
+export PATH=/usr/local/go/bin:$PATH   # go version → go1.26.8
+```
 
 ## Run
 
 ```sh
-scripts/run.sh            # everything, ~5 min
-scripts/run.sh ppprt      # Table 7 "This Work", as published     ~1 min
-scripts/run.sh baseline   # Table 7 baseline, upstream gnark        ~2 min
+scripts/run.sh            # everything, ~7 min
+scripts/run.sh ppprt      # Table 7 "This Work", as published     ~2 min
+scripts/run.sh baseline   # Table 7 baseline, gnark's pairing       ~2 min
 scripts/run.sh table7     # Table 7 on patched gnark (polyring)     ~45 s
 scripts/run.sh smoke      # polyring test suite                     ~25 s
+scripts/run.sh summary    # baseline vs ppprt: medians ± spread     ~1 s
+COUNT=1 scripts/run.sh    # quick: each benchmark once instead of 6 times
 ```
 
 ## Expected output
 
 | Command | Paper | Expected |
 |---|---|---|
-| `ppprt` | Table 7, "This Work" | `nb constraints` 1,035,645 SCS / 316,181 R1CS (BN254), 1,191,256 / 368,461 (BLS12-381): within 0.02% of the paper |
-| `baseline` | Table 7, baseline | 1,604,279 / 495,810 (BN254), 1,779,202 / 542,925 (BLS12-381): within 1% of the paper |
+| `ppprt` | Table 7, "This Work" | At ppprt `2f9ffd0`: `nb constraints` 1,035,338 SCS / 315,955 R1CS (BN254), 1,190,949 / 368,278 (BLS12-381): within 0.07% of the paper; `nb commitments` identical |
+| `baseline` | Table 7, baseline | Same tree with gnark's pairing: `nb constraints` 1,592,216 / 491,223 (BN254), 1,784,091 / 545,354 (BLS12-381): within 0.05% of the paper; `nb commitments` identical |
 | `table7` | Table 7 on patched gnark | Full table printed, gnark vs polyring; fails if any count drifts |
 | `smoke` | correctness | every package `ok` |
 
+The exact working tree the paper's columns were measured on was not committed. At `2f9ffd0` both columns sit the same 212–224 (BN254) and 156 (BLS12-381) constraints below the paper, so the gap is in the surrounding benchmark circuit, not the pairing check, and the reductions match the paper to within 0.1 percentage points.
+
 How to read each output line: [ppprt/README.md](ppprt/README.md#reading-the-output). Why the patched numbers differ from the paper: [polyring/paper/ARTIFACT.md](polyring/paper/ARTIFACT.md#why-the-numbers-move).
 
-Constraint counts are exact. Times and memory move ~20% between runs and machines, so compare reductions rather than absolute values.
+Constraint counts are exact. Times and memory vary between runs and machines (`ppprt` and `baseline` repeat each benchmark `COUNT=6` times; `results/table7-summary.txt` gives the spread), so compare reductions rather than absolute values.
 
 ## Licence
 
