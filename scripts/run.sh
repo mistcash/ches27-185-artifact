@@ -40,8 +40,14 @@ baseline() {
 }
 
 summary() {
+  # On an empty module cache the results files also hold "go: downloading …" lines,
+  # which make benchstat print two separate tables instead of a comparison; drop them.
+  local tmp f
+  tmp="$(mktemp -d)"
+  for f in baseline ppprt; do grep -v '^go: ' "$RESULTS/table7-$f.txt" >"$tmp/$f.txt" || true; done
   go run golang.org/x/perf/cmd/benchstat@v0.0.0-20261117185222-4febdb082b2c \
-    baseline="$RESULTS/table7-baseline.txt" ppprt="$RESULTS/table7-ppprt.txt" | tee "$RESULTS/table7-summary.txt"
+    baseline="$tmp/baseline.txt" ppprt="$tmp/ppprt.txt" | tee "$RESULTS/table7-summary.txt"
+  rm -rf "$tmp"
 }
 
 case "${1:-all}" in
